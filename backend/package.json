@@ -1,0 +1,27 @@
+{
+  "name": "appointment-backend",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/shared/infra/presentation/http/restServer.ts",
+    "start": "node dist/shared/infra/presentation/http/restServer.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT License",
+  "description": "",
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.15.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@types/cors": "^2.8.17",
+    "celebrate": "^15.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "express-async-errors": "^3.1.1"
+  }
+}

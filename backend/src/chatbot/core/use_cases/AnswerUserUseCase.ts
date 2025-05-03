@@ -1,6 +1,7 @@
 import { Id } from "../../../shared/core/entities/Id";
 import { ConversationRepository } from "../data/repositories/ConversationRepository";
-import { Conversation, UserMessage } from "../entities/Conversation";
+import { Conversation } from "../entities/Conversation";
+import { UserMessage } from "../entities/Message";
 import { AiAgent } from "../services/AiAgent";
 
 export interface AnswerUserParams {

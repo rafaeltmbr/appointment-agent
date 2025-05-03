@@ -1,28 +1,22 @@
+import { Conversation } from "../../core/entities/Conversation";
 import {
-  Conversation,
   Message,
   ModelMessage,
   ToolCallMessage,
   ToolResponseMessage,
   UserMessage,
-} from "../../core/entities/Conversation";
+} from "../../core/entities/Message";
+import { Tool } from "../../core/entities/Tool";
 import { Llm } from "../../core/services/Llm";
-
-const tools = [
-  {
-    functionDeclarations: [
-      {
-        name: "list_available_hours",
-        description: "Lista os horários de agendamento disponíveis.",
-      },
-    ],
-  },
-];
 
 export class LlmGemini implements Llm {
   constructor(private url: string) {}
 
-  async generate(system: string, conversation: Conversation): Promise<Message> {
+  async generate(
+    system: string,
+    conversation: Conversation,
+    tools: Tool[]
+  ): Promise<Message> {
     const content = {
       system_instruction: {
         parts: {
@@ -30,7 +24,7 @@ export class LlmGemini implements Llm {
         },
       },
       contents: conversation.messages.map(LlmGemini.formatContentMessage),
-      tools,
+      tools: LlmGemini.formatTools(tools),
     };
 
     const response = await fetch(this.url, {
@@ -57,6 +51,39 @@ export class LlmGemini implements Llm {
     }
 
     throw new Error("Invalid LLM response.");
+  }
+
+  private static formatTools(tools: Tool[]): object {
+    const functionDeclarations: object[] = [];
+
+    for (const tool of tools) {
+      const properties: Record<string, object> = {};
+
+      const required: string[] = [];
+
+      for (const parameter of tool.parameters) {
+        properties[parameter.name] = {
+          type: "string",
+          description: parameter.description,
+        };
+
+        if (parameter.isRequired) {
+          required.push(parameter.name);
+        }
+      }
+
+      functionDeclarations.push({
+        name: tool.name,
+        description: tool.description,
+        parameters: {
+          type: "object",
+          properties,
+          required,
+        },
+      });
+    }
+
+    return [{ functionDeclarations }];
   }
 
   private static formatContentMessage(message: Message): object {

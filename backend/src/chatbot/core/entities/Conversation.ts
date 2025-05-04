@@ -23,8 +23,12 @@ export class Conversation {
   }
 
   toString(): string {
-    return `Conversation=(\n\tid=${this._id},\n\tmessages=[\n${this._messages
-      .map((m) => `\t\t${m}`)
-      .join("\n")}\n\t]\n)`;
+    return `
+Conversation=(
+  id='${this._id}',
+  messages=[
+${this._messages.map((m) => `    ${m}`).join(",\n")}
+  ]
+)`.trim();
   }
 }

@@ -7,5 +7,5 @@ export interface Llm {
     system: string,
     conversation: Conversation,
     tools: Tool[]
-  ): Promise<Message>;
+  ): Promise<Message[]>;
 }

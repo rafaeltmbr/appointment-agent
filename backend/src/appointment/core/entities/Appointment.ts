@@ -106,10 +106,10 @@ export class Appointment {
   }
 
   toString(): string {
-    return `Appointment(id=${
+    return `Appointment(id='${
       this._id
-    }, date=${this._date.toISOString()}, clientName=${
+    }', date='${this._date.toISOString()}', clientName='${
       this._client.name
-    }, clientGovernmentId=${this._client.governmentId})`;
+    }', clientGovernmentId='${this._client.governmentId}')`;
   }
 }

@@ -5,7 +5,7 @@ export class UserMessage extends Message {
 
   constructor(text: string) {
     super();
-    this._text = text;
+    this._text = text.trim();
   }
 
   get text(): string {
@@ -22,7 +22,7 @@ export class ModelMessage extends Message {
 
   constructor(text: string) {
     super();
-    this._text = text;
+    this._text = text.trim();
   }
 
   get text(): string {
@@ -30,7 +30,7 @@ export class ModelMessage extends Message {
   }
 
   toString(): string {
-    return `ModelMessage(text='${this._text})'`;
+    return `ModelMessage(text='${this._text}')`;
   }
 }
 
@@ -54,7 +54,7 @@ export class ToolCallMessage extends Message {
 
   toString(): string {
     const parameters = Object.keys(this._parameters)
-      .map((key) => `${key}: ${this._parameters[key]}`)
+      .map((key) => `${key}: '${this._parameters[key]}'`)
       .join(", ");
     return `ToolCallMessage(name='${this._name}', parameters={${parameters}})`;
   }
@@ -79,6 +79,6 @@ export class ToolResponseMessage extends Message {
   }
 
   toString(): string {
-    return `ToolResponseMessage(name='${this._name}', text={${this._text}})`;
+    return `ToolResponseMessage(name='${this._name}', text='${this._text}')`;
   }
 }

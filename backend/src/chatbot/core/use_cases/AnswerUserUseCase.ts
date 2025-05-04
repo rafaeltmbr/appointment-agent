@@ -1,7 +1,7 @@
 import { Id } from "../../../shared/core/entities/Id";
 import { ConversationRepository } from "../data/repositories/ConversationRepository";
 import { Conversation } from "../entities/Conversation";
-import { UserMessage } from "../entities/Message";
+import { ModelMessage, UserMessage } from "../entities/Message";
 import { AiAgent } from "../services/AiAgent";
 
 export interface AnswerUserParams {
@@ -35,11 +35,14 @@ export class AnswerUserUseCase {
 
     console.log(conversation.toString());
 
-    const response = conversation.messages.at(-1)!!;
+    const response = conversation.messages.at(-1);
+    if (!(response instanceof ModelMessage)) {
+      throw new Error("Unexpected agent response.");
+    }
 
     return {
       conversationId: conversation.id,
-      answer: response.toString(),
+      answer: response.text,
     };
   }
 }

@@ -16,38 +16,39 @@ export class LlmGemini implements Llm {
     system: string,
     conversation: Conversation,
     tools: Tool[]
-  ): Promise<Message> {
+  ): Promise<Message[]> {
     const content = {
-      system_instruction: {
-        parts: {
-          text: system,
-        },
-      },
+      system_instruction: { parts: { text: system } },
       contents: conversation.messages.map(LlmGemini.formatContentMessage),
       tools: LlmGemini.formatTools(tools),
+      generationConfig: { temperature: 0.2 },
     };
 
     const response = await fetch(this.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(content),
     });
 
     const json = await response.json();
 
-    const toolCall =
-      json.candidates?.[0]?.content.parts[0]?.functionCall ||
-      json.candidates?.[0]?.content.parts[1]?.functionCall;
+    if (!response.ok) {
+      throw new Error(json?.error?.message ?? "LLM unexpected error.");
+    }
 
-    if (toolCall) {
-      return new ToolCallMessage(toolCall.name, toolCall.args);
+    const toolCalls = (json.candidates?.[0]?.content.parts ?? [])
+      .map((contentPart: any) => contentPart.functionCall)
+      .filter((toolCall: any) => !!toolCall);
+
+    if (toolCalls.length) {
+      return toolCalls.map(
+        (toolCall: any) => new ToolCallMessage(toolCall.name, toolCall.args)
+      );
     }
 
     const text = json.candidates?.[0]?.content.parts[0]?.text;
     if (text) {
-      return new ModelMessage(text);
+      return [new ModelMessage(text)];
     }
 
     throw new Error("Invalid LLM response.");

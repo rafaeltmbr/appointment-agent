@@ -1,9 +1,5 @@
 import { Conversation } from "../../entities/Conversation";
-import {
-  Message,
-  ToolCallMessage,
-  ToolResponseMessage,
-} from "../../entities/Message";
+import { ToolCallMessage, ToolResponseMessage } from "../../entities/Message";
 import { Tool } from "../../entities/Tool";
 import { AiAgent } from "../AiAgent";
 import { Llm } from "../Llm";
@@ -16,39 +12,56 @@ export class AiAgentImpl implements AiAgent {
   ) {}
 
   async ask(conversation: Conversation): Promise<void> {
-    const modelResponse = await this.llm.generate(
+    const modelResponses = await this.llm.generate(
       this.systemPrompt,
       conversation,
       this.tools
     );
 
-    conversation.addMessage(modelResponse);
+    modelResponses.forEach((response) => conversation.addMessage(response));
 
-    while (conversation.messages.at(-1) instanceof ToolCallMessage) {
-      const toolCallMessage = conversation.messages.at(-1) as ToolCallMessage;
-      const tool = this.tools.find((t) => t.name === toolCallMessage.name);
-      if (!tool) throw new Error(`Tool '${toolCallMessage.name}' not found.`);
+    while (AiAgentImpl.extractPendingToolCalls(conversation).length > 0) {
+      const pendingToolCalls =
+        AiAgentImpl.extractPendingToolCalls(conversation);
 
-      let response: string;
-      try {
-        response = await tool.execute(toolCallMessage.parameters);
-      } catch (e: unknown) {
-        const message = e instanceof Error ? e.message : String(e);
-        response = message;
-      }
+      const toolResponses = await Promise.all(
+        pendingToolCalls.map(async (toolCall) => {
+          try {
+            const tool = this.tools.find((tool) => tool.name === toolCall.name);
+            if (!tool) throw new Error(`Tool '${toolCall.name}' not found.`);
 
-      const toolCallResponse = new ToolResponseMessage(
-        toolCallMessage.name,
-        response
+            const response = await tool.execute(toolCall.parameters);
+            return new ToolResponseMessage(toolCall.name, response);
+          } catch (e: unknown) {
+            return new ToolResponseMessage(
+              toolCall.name,
+              e instanceof Error ? e.message : String(e)
+            );
+          }
+        })
       );
-      conversation.addMessage(toolCallResponse);
 
-      const modelResponse = await this.llm.generate(
+      toolResponses.forEach((response) => conversation.addMessage(response));
+
+      const modelResponses = await this.llm.generate(
         this.systemPrompt,
         conversation,
         this.tools
       );
-      conversation.addMessage(modelResponse);
+      modelResponses.forEach((response) => conversation.addMessage(response));
     }
+  }
+
+  private static extractPendingToolCalls(
+    conversation: Conversation
+  ): ToolCallMessage[] {
+    const toolCalls: ToolCallMessage[] = [];
+    for (let i = conversation.messages.length - 1; i >= 0; i -= 1) {
+      const message = conversation.messages[i];
+      if (!(message instanceof ToolCallMessage)) break;
+
+      toolCalls.push(message);
+    }
+    return toolCalls.reverse();
   }
 }

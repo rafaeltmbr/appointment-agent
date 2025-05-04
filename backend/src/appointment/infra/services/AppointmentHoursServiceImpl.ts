@@ -29,7 +29,7 @@ export class AppointmentHoursServiceImpl implements AppointmentHoursService {
       );
 
       for (const hour of this.openingHours) {
-        allHours.push(new Date(`${day}T${hour}`));
+        allHours.push(new Date(`${day}T${hour}-03:00`));
       }
     }
 

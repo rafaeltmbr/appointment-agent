@@ -3,6 +3,7 @@ import { ConversationRepository } from "../data/repositories/ConversationReposit
 import { Conversation } from "../entities/Conversation";
 import { ModelMessage, UserMessage } from "../entities/Message";
 import { AiAgent } from "../services/AiAgent";
+import { LlmUsage } from "../services/Llm";
 
 export interface AnswerUserParams {
   conversationId: string | null;
@@ -10,8 +11,9 @@ export interface AnswerUserParams {
 }
 
 export interface AnswerUserResponse {
-  conversationId: Id;
   answer: string;
+  conversation: Conversation;
+  totalLlmUsage: LlmUsage;
 }
 
 export class AnswerUserUseCase {
@@ -30,10 +32,8 @@ export class AnswerUserUseCase {
 
     conversation.addMessage(new UserMessage(params.question));
 
-    await this.aiAgent.ask(conversation);
+    const totalLlmUsage = await this.aiAgent.ask(conversation);
     await this.conversationRepository.upsert(conversation);
-
-    console.log(conversation.toString());
 
     const response = conversation.messages.at(-1);
     if (!(response instanceof ModelMessage)) {
@@ -41,8 +41,9 @@ export class AnswerUserUseCase {
     }
 
     return {
-      conversationId: conversation.id,
       answer: response.text,
+      conversation,
+      totalLlmUsage,
     };
   }
 }

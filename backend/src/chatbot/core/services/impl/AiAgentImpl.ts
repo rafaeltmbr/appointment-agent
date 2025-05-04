@@ -2,7 +2,7 @@ import { Conversation } from "../../entities/Conversation";
 import { ToolCallMessage, ToolResponseMessage } from "../../entities/Message";
 import { Tool } from "../../entities/Tool";
 import { AiAgent } from "../AiAgent";
-import { Llm } from "../Llm";
+import { Llm, LlmUsage } from "../Llm";
 
 export class AiAgentImpl implements AiAgent {
   constructor(
@@ -11,14 +11,23 @@ export class AiAgentImpl implements AiAgent {
     private tools: Tool[]
   ) {}
 
-  async ask(conversation: Conversation): Promise<void> {
-    const modelResponses = await this.llm.generate(
+  async ask(conversation: Conversation): Promise<LlmUsage> {
+    const totalLlmUsage: LlmUsage = {
+      inputTokens: 0,
+      outputTokens: 0,
+    };
+
+    const modelResponse = await this.llm.generate(
       this.systemPrompt,
       conversation,
       this.tools
     );
 
-    modelResponses.forEach((response) => conversation.addMessage(response));
+    modelResponse.messages.forEach((response) =>
+      conversation.addMessage(response)
+    );
+    totalLlmUsage.inputTokens += modelResponse.usage.inputTokens;
+    totalLlmUsage.outputTokens += modelResponse.usage.outputTokens;
 
     while (AiAgentImpl.extractPendingToolCalls(conversation).length > 0) {
       const pendingToolCalls =
@@ -43,13 +52,19 @@ export class AiAgentImpl implements AiAgent {
 
       toolResponses.forEach((response) => conversation.addMessage(response));
 
-      const modelResponses = await this.llm.generate(
+      const modelResponse = await this.llm.generate(
         this.systemPrompt,
         conversation,
         this.tools
       );
-      modelResponses.forEach((response) => conversation.addMessage(response));
+      modelResponse.messages.forEach((response) =>
+        conversation.addMessage(response)
+      );
+      totalLlmUsage.inputTokens += modelResponse.usage.inputTokens;
+      totalLlmUsage.outputTokens += modelResponse.usage.outputTokens;
     }
+
+    return totalLlmUsage;
   }
 
   private static extractPendingToolCalls(

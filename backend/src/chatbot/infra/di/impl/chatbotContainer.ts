@@ -7,6 +7,7 @@ import { ListAvailableAppointmentHoursTool } from "../../../core/tools/ListAvail
 import { MakeAppointmentTool } from "../../../core/tools/MakeAppointmenTool";
 import { AnswerUserUseCase } from "../../../core/use_cases/AnswerUserUseCase";
 import { ConversationRepositoryInMemory } from "../../data/repositories/ConversationRepositoriesInMemory";
+import { LlmChatGpt } from "../../services/LlmChatGpt";
 import { LlmGemini } from "../../services/LlmGemini";
 import {
   ChatbotContainer,
@@ -48,7 +49,20 @@ Você é o assistente virtual da **Clínica de Dentistas John Dói**. Seu objeti
 - Local de atendimento: Brasil
 `.trim();
 
-const llm = new LlmGemini(process.env.GEMINI_URL ?? "");
+const isChatGptAvailable =
+  process.env.OPENAI_URL &&
+  process.env.OPENAI_API_KEY &&
+  process.env.OPENAI_MODEL;
+
+const llm = isChatGptAvailable
+  ? new LlmChatGpt(
+      process.env.OPENAI_URL ?? "",
+      process.env.OPENAI_API_KEY ?? "",
+      process.env.OPENAI_MODEL ?? ""
+    )
+  : new LlmGemini(process.env.GEMINI_URL ?? "");
+
+console.log("Using", isChatGptAvailable ? "ChatGPT" : "Gemini");
 
 const tools: Tool[] = [
   new ListAvailableAppointmentHoursTool(

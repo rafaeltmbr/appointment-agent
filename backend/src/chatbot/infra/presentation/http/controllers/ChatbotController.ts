@@ -14,13 +14,19 @@ export class ChatbotController {
       conversationId: req.body.conversation_id,
     };
 
-    const answer = await this.answerUserUseCase.execute(params);
+    const response = await this.answerUserUseCase.execute(params);
 
-    const response = {
-      conversation_id: answer.conversationId.value,
-      answer: answer.answer,
+    const content = {
+      answer: response.answer,
+      conversation: {
+        id: response.conversation.id.value,
+        messages: response.conversation.messages.map((message) =>
+          message.toString()
+        ),
+      },
+      totalLlmUsage: response.totalLlmUsage,
     };
 
-    res.json(response);
+    res.json(content);
   }
 }

@@ -7,7 +7,7 @@ import {
   UserMessage,
 } from "../../core/entities/Message";
 import { Tool } from "../../core/entities/Tool";
-import { Llm } from "../../core/services/Llm";
+import { Llm, LlmOutput, LlmUsage } from "../../core/services/Llm";
 
 export class LlmGemini implements Llm {
   constructor(private url: string) {}
@@ -16,7 +16,7 @@ export class LlmGemini implements Llm {
     system: string,
     conversation: Conversation,
     tools: Tool[]
-  ): Promise<Message[]> {
+  ): Promise<LlmOutput> {
     const content = {
       system_instruction: { parts: { text: system } },
       contents: conversation.messages.map(LlmGemini.formatContentMessage),
@@ -36,19 +36,30 @@ export class LlmGemini implements Llm {
       throw new Error(json?.error?.message ?? "LLM unexpected error.");
     }
 
+    const usage: LlmUsage = {
+      inputTokens: json.usageMetadata?.promptTokenCount ?? 0,
+      outputTokens: json.usageMetadata?.candidatesTokenCount,
+    };
+
     const toolCalls = (json.candidates?.[0]?.content.parts ?? [])
       .map((contentPart: any) => contentPart.functionCall)
       .filter((toolCall: any) => !!toolCall);
 
     if (toolCalls.length) {
-      return toolCalls.map(
-        (toolCall: any) => new ToolCallMessage(toolCall.name, toolCall.args)
-      );
+      return {
+        messages: toolCalls.map(
+          (toolCall: any) => new ToolCallMessage(toolCall.name, toolCall.args)
+        ),
+        usage,
+      };
     }
 
     const text = json.candidates?.[0]?.content.parts[0]?.text;
     if (text) {
-      return [new ModelMessage(text)];
+      return {
+        messages: [new ModelMessage(text)],
+        usage,
+      };
     }
 
     throw new Error("Invalid LLM response.");

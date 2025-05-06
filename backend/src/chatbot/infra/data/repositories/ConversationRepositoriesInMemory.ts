@@ -14,7 +14,7 @@ export class ConversationRepositoryInMemory implements ConversationRepository {
       (c) => c.id.value === conversation.id.value
     );
     if (index >= 0) {
-      this.conversations.splice(index, 1, conversation);
+      this.conversations[index] = conversation;
       return;
     }
 

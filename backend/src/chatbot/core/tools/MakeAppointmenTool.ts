@@ -21,7 +21,7 @@ export class MakeAppointmentTool extends Tool {
         {
           name: "government_id",
           description:
-            "Número de documento do cliente no (dígitos numéricos no formato: XXX.XXX.XXX.-XX).",
+            "Número de documento do cliente no (dígitos numéricos que representam o CPF no formato: XXX.XXX.XXX-XX).",
           isRequired: true,
         },
       ]

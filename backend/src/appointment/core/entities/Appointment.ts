@@ -46,11 +46,11 @@ export class ClientGovernmentId {
   }
 
   validate() {
-    const regex = /[0-9]{1, 3}.[0-9]{3}.[0-9]{3}-[0-9]/g;
-    if (!this._value.matchAll(regex)) {
+    const regex = /^[0-9]{3}.[0-9]{3}.[0-9]{3}-[0-9]{2}$/;
+    if (!this._value.match(regex)) {
       throw new DomainError(
         "invalid_value",
-        "Invalid GovernmentId (RG) value."
+        "Invalid GovernmentId (CPF) value."
       );
     }
   }

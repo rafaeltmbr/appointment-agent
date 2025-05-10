@@ -1,3 +1,5 @@
+import { Id } from "../../../shared/core/entities/Id";
+
 export class Message {}
 
 export class UserMessage extends Message {
@@ -35,13 +37,19 @@ export class ModelMessage extends Message {
 }
 
 export class ToolCallMessage extends Message {
+  private _callId: Id;
   private _name: string;
   private _parameters: Record<string, any>;
 
-  constructor(name: string, parameters: Record<string, any>) {
+  constructor(callId: Id, name: string, parameters: Record<string, any>) {
     super();
+    this._callId = callId;
     this._name = name;
     this._parameters = parameters;
+  }
+
+  get callId(): Id {
+    return this._callId;
   }
 
   get name(): string {
@@ -56,18 +64,24 @@ export class ToolCallMessage extends Message {
     const parameters = Object.keys(this._parameters)
       .map((key) => `${key}: '${this._parameters[key]}'`)
       .join(", ");
-    return `ToolCallMessage(name='${this._name}', parameters={${parameters}})`;
+    return `ToolCallMessage(callId='${this._callId}', name='${this._name}', parameters={${parameters}})`;
   }
 }
 
 export class ToolResponseMessage extends Message {
+  private _callId: Id;
   private _name: string;
   private _text: string;
 
-  constructor(name: string, text: string) {
+  constructor(callId: Id, name: string, text: string) {
     super();
+    this._callId = callId;
     this._name = name;
     this._text = text;
+  }
+
+  get callId(): Id {
+    return this._callId;
   }
 
   get name(): string {
@@ -79,6 +93,6 @@ export class ToolResponseMessage extends Message {
   }
 
   toString(): string {
-    return `ToolResponseMessage(name='${this._name}', text='${this._text}')`;
+    return `ToolResponseMessage(callId='${this._callId}', name='${this._name}', text='${this._text}')`;
   }
 }

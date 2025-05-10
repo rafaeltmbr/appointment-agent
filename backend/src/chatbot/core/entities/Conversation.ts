@@ -5,7 +5,7 @@ export class Conversation {
   private _id: Id;
   private _messages: Message[];
 
-  constructor(id: Id = Id.generate(), messages: Message[] = []) {
+  constructor(id: Id = new Id(), messages: Message[] = []) {
     this._id = id;
     this._messages = messages;
   }

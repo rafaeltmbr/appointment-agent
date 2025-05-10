@@ -3,8 +3,11 @@ import { DomainError } from "./DomainError";
 export class Id {
   private _value: string;
 
-  constructor(value: string) {
-    this._value = value;
+  constructor(value: string = Id.generate().value) {
+    this._value = value
+      .split("")
+      .filter((char) => Id.alphabet.includes(char))
+      .join("");
 
     this.validate();
   }
@@ -18,19 +21,23 @@ export class Id {
   }
 
   private validate() {
-    if (this._value.length === 0) {
-      throw new DomainError("invalid_value", "Id should not be empty.");
+    if (this._value.length !== 20) {
+      throw new DomainError(
+        "invalid_value",
+        "Id must have 20 alphanumeric characters."
+      );
     }
   }
 
-  static generate(): Id {
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  private static alphabet =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
+  private static generate(): Id {
     const chars: string[] = [];
 
-    for (let i = 0; i < 12; i += 1) {
-      const index = Math.floor(Math.random() * alphabet.length);
-      const char = alphabet[index];
+    for (let i = 0; i < 20; i += 1) {
+      const index = Math.floor(Math.random() * Id.alphabet.length);
+      const char = Id.alphabet[index];
       chars.push(char);
     }
 

@@ -40,9 +40,14 @@ export class AiAgentImpl implements AiAgent {
             if (!tool) throw new Error(`Tool '${toolCall.name}' not found.`);
 
             const response = await tool.execute(toolCall.parameters);
-            return new ToolResponseMessage(toolCall.name, response);
+            return new ToolResponseMessage(
+              toolCall.callId,
+              toolCall.name,
+              response
+            );
           } catch (e: unknown) {
             return new ToolResponseMessage(
+              toolCall.callId,
               toolCall.name,
               e instanceof Error ? e.message : String(e)
             );

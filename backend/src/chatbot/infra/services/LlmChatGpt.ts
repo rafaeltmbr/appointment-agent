@@ -59,7 +59,11 @@ export class LlmChatGpt implements Llm {
       return {
         messages: toolCalls.map(
           (toolCall: any) =>
-            new ToolCallMessage(toolCall.name, JSON.parse(toolCall.arguments))
+            new ToolCallMessage(
+              new Id(),
+              toolCall.name,
+              JSON.parse(toolCall.arguments)
+            )
         ),
         usage,
       };
@@ -133,13 +137,13 @@ export class LlmChatGpt implements Llm {
           status: "completed",
           name: message.name,
           arguments: JSON.stringify(message.parameters),
-          call_id: Id.generate().value,
+          call_id: message.callId.value,
         });
       } else if (message instanceof ToolResponseMessage) {
         formattedMessages.push({
           type: "function_call_output",
           output: message.text,
-          call_id: (formattedMessages.at(-1) as any).call_id,
+          call_id: message.callId.value,
         });
       } else {
         throw new Error("Unsupported message.");

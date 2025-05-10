@@ -1,3 +1,4 @@
+import { Id } from "../../../shared/core/entities/Id";
 import { Conversation } from "../../core/entities/Conversation";
 import {
   Message,
@@ -48,7 +49,8 @@ export class LlmGemini implements Llm {
     if (toolCalls.length) {
       return {
         messages: toolCalls.map(
-          (toolCall: any) => new ToolCallMessage(toolCall.name, toolCall.args)
+          (toolCall: any) =>
+            new ToolCallMessage(new Id(), toolCall.name, toolCall.args)
         ),
         usage,
       };

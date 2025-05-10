@@ -38,7 +38,7 @@ export class AppointmentRepositoryInMemory implements AppointmentRepository {
   }
 
   async create(date: Date, client: Client): Promise<Appointment> {
-    const id = Id.generate();
+    const id = new Id();
     const appointment = new Appointment(id, date, client);
     this.appointments.push(appointment);
     return appointment;

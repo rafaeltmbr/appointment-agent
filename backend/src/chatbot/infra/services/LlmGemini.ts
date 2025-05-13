@@ -48,9 +48,10 @@ export class LlmGemini implements Llm {
 
     if (toolCalls.length) {
       return {
-        messages: toolCalls.map(
-          (toolCall: any) =>
-            new ToolCallMessage(new Id(), toolCall.name, toolCall.args)
+        message: new ToolCallMessage(
+          new Id(),
+          toolCalls[0].name,
+          toolCalls[0].args
         ),
         usage,
       };
@@ -59,7 +60,7 @@ export class LlmGemini implements Llm {
     const text = json.candidates?.[0]?.content.parts[0]?.text;
     if (text) {
       return {
-        messages: [new ModelMessage(text)],
+        message: new ModelMessage(text),
         usage,
       };
     }

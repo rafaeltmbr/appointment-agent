@@ -8,7 +8,7 @@ export interface LlmUsage {
 }
 
 export interface LlmOutput {
-  messages: Message[];
+  message: Message;
   usage: LlmUsage;
 }
 

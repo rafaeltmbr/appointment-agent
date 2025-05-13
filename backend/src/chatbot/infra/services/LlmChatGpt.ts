@@ -57,13 +57,10 @@ export class LlmChatGpt implements Llm {
 
     if (toolCalls.length) {
       return {
-        messages: toolCalls.map(
-          (toolCall: any) =>
-            new ToolCallMessage(
-              new Id(),
-              toolCall.name,
-              JSON.parse(toolCall.arguments)
-            )
+        message: new ToolCallMessage(
+          new Id(),
+          toolCalls[0].name,
+          JSON.parse(toolCalls[0].arguments)
         ),
         usage,
       };
@@ -74,7 +71,7 @@ export class LlmChatGpt implements Llm {
     );
     if (textOutput) {
       return {
-        messages: [new ModelMessage(textOutput.content[0].text)],
+        message: new ModelMessage(textOutput.content[0].text),
         usage,
       };
     }

@@ -138,7 +138,7 @@ export class LlmGemini implements Llm {
             functionResponse: {
               name: message.name,
               response: {
-                text: message.text,
+                text: message.response,
               },
             },
           },

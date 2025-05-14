@@ -71,13 +71,13 @@ export class ToolCallMessage extends Message {
 export class ToolResponseMessage extends Message {
   private _callId: Id;
   private _name: string;
-  private _text: string;
+  private _response: string;
 
-  constructor(callId: Id, name: string, text: string) {
+  constructor(callId: Id, name: string, response: string) {
     super();
     this._callId = callId;
     this._name = name;
-    this._text = text;
+    this._response = response;
   }
 
   get callId(): Id {
@@ -88,11 +88,11 @@ export class ToolResponseMessage extends Message {
     return this._name;
   }
 
-  get text(): string {
-    return this._text;
+  get response(): string {
+    return this._response;
   }
 
   toString(): string {
-    return `ToolResponseMessage(callId='${this._callId}', name='${this._name}', text='${this._text}')`;
+    return `ToolResponseMessage(callId='${this._callId}', name='${this._name}', response='${this._response}')`;
   }
 }

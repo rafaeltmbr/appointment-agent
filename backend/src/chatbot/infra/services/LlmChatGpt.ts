@@ -139,7 +139,7 @@ export class LlmChatGpt implements Llm {
       } else if (message instanceof ToolResponseMessage) {
         formattedMessages.push({
           type: "function_call_output",
-          output: message.text,
+          output: message.response,
           call_id: message.callId.value,
         });
       } else {
